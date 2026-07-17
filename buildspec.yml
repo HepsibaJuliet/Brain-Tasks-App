@@ -14,19 +14,24 @@ phases:
       - echo Tagging Docker image...
       - docker tag brain-tasks-app:latest 596451156793.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app:v1
 
-  post_build:
-    commands:
-      - echo Pushing image to ECR...
-      - docker push 596451156793.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app:v1
+post_build:
+  commands:
+    - echo Pushing image to ECR...
+    - docker push 596451156793.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app:v1
 
-      - echo Updating kubeconfig...
-      - aws eks update-kubeconfig --region us-east-1 --name brain-tasks-eks
+    - echo "Who am I?"
+    - aws sts get-caller-identity
 
-      - echo Deploying application...
-      - kubectl apply -f deployment.yaml
-      - kubectl apply -f service.yaml
+    - echo "Updating kubeconfig..."
+    - aws eks update-kubeconfig --region us-east-1 --name brain-tasks-eks
 
-      - kubectl rollout status deployment/brain-tasks-app
+    - echo "Testing cluster..."
+    - kubectl get nodes
+
+    - echo "Deploying..."
+    - kubectl apply -f deployment.yaml
+    - kubectl apply -f service.yaml  
+
 
 artifacts:
   files:
