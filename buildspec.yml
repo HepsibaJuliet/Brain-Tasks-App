@@ -18,51 +18,20 @@ phases:
       - echo Pushing image to ECR...
       - docker push 596451156793.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app:v1
 
-      - echo Updating kubeconfig...
+      - echo "Who am I?"
+      - aws sts get-caller-identity
+
+      - echo "Updating kubeconfig..."
       - aws eks update-kubeconfig --region us-east-1 --name brain-tasks-eks
 
-      - echo Deploying application...
+      - echo "Testing cluster..."
+      - kubectl get nodes
+
+      - echo "Deploying..."
       - kubectl apply -f deployment.yaml --validate=false
       - kubectl apply -f service.yaml --validate=false
 
       - kubectl rollout status deployment/brain-tasks-app
-
-artifacts:
-  files:
-    - '**/*'version: 0.2
-
-phases:
-  pre_build:
-    commands:
-      - echo Logging into Amazon ECR...
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 596451156793.dkr.ecr.us-east-1.amazonaws.com
-
-  build:
-    commands:
-      - echo Building Docker image...
-      - docker build -t brain-tasks-app .
-
-      - echo Tagging Docker image...
-      - docker tag brain-tasks-app:latest 596451156793.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app:v1
-
-post_build:
-  commands:
-    - echo Pushing image to ECR...
-    - docker push 596451156793.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app:v1
-
-    - echo "Who am I?"
-    - aws sts get-caller-identity
-
-    - echo "Updating kubeconfig..."
-    - aws eks update-kubeconfig --region us-east-1 --name brain-tasks-eks
-
-    - echo "Testing cluster..."
-    - kubectl get nodes
-
-    - echo "Deploying..."
-    - kubectl apply -f deployment.yaml
-    - kubectl apply -f service.yaml  
-
 
 artifacts:
   files:
